@@ -4,7 +4,7 @@
 
 (defn respond-hello
   [request]
-  {:status 200 :body "Hello, World!"})
+  {:status 200 :body "Hello!"})
 
 (def routes
   (route/expand-routes
@@ -12,13 +12,28 @@
        :get respond-hello,
        :route-name :greet]}))
 
-(defn create-server
-  []
-  (http/create-server
-    {::http/routes routes,
-     ::http/type :jetty,
-     ::http/port 8890}))
+(def service-map
+  {::http/routes routes
+   ::http/type :jetty
+   ::http/port 8890})
 
-(defn start
+(defn start []
+  (http/start (http/create-server service-map)))
+
+(defonce server (atom nil))
+
+(defn start-dev
   []
-  (http/start (create-server)))
+  (reset! server
+          (http/start (http/create-server
+                        (assoc service-map
+                               ::http/join? false)))))
+
+(defn stop-dev
+  []
+  (http/stop @server))
+
+(defn restart
+  []
+  (stop-dev)
+  (start-dev))
