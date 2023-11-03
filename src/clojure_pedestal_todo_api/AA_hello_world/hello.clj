@@ -12,6 +12,17 @@
        :get respond-hello,
        :route-name :greet]}))
 
+(defn respond-hello-with-query-params
+  [request]
+  (let [user-name (get-in request [:query-params :name])]
+    {:status 200 :body (str "Hello, " user-name "\n")}))
+
+(def routes
+  (route/expand-routes
+    #{["/greet-with-query-params",
+       :get respond-hello-with-query-params,
+       :route-name :greet]}))
+
 (def service-map
   {::http/routes routes
    ::http/type :jetty
